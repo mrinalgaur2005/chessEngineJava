@@ -17,7 +17,12 @@ public class King extends Piece {
 
 
     public King(final int piecePosition,final Alliance pieceAlliance){
-        super(PieceType.KING,piecePosition, pieceAlliance);
+        super(PieceType.KING,piecePosition, pieceAlliance,true);
+    }
+    public King(final Alliance pieceAlliance,
+                final int piecePosition,
+                final boolean isFirstMove){
+                super(PieceType.KING, piecePosition, pieceAlliance, isFirstMove);
     }
 
     @Override
