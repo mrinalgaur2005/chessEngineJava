@@ -31,8 +31,8 @@ public class Pawn extends Piece {
             if(currentCandidateOffest == 8 && !board.getTile(candidateDestinationCoordinate).isTileOccupied()){
                 legalMoves.add(new Move.MajourMove(board, this, candidateDestinationCoordinate));
             }else if (currentCandidateOffest==16 && this.isFirstMove() && 
-            (BoardUtils.SECOND_ROW[this.piecePosition] && this.getAlliance().isBlack()) || 
-            BoardUtils.SEVENTH_ROW[this.piecePosition] && this.getAlliance().isWhite()) {
+            (BoardUtils.SEVENTH_RAMK[this.piecePosition] && this.getAlliance().isBlack()) || 
+            BoardUtils.SECOND_RANK[this.piecePosition] && this.getAlliance().isWhite()) {
 
                 final int behindCandidateDestinationCoordinate = this.piecePosition + (this.pieceAlliance.getDirection()*8);
 
