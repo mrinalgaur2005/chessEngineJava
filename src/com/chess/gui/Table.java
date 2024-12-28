@@ -227,7 +227,7 @@ public class Table {
                             destinationTile.getTileCoordiate());
                             final MoveTransition transition = chessBoard.currentPlayer().makeMove(move);
                             if(transition.getMoveStatus().isDone()){
-                                chessBoard=transition.getBoard();
+                                chessBoard=transition.getTransitionBoard();
                                 
                             }
                             sourceTile=null;

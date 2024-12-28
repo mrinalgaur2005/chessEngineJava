@@ -73,7 +73,6 @@ public enum Alliance {
     public abstract boolean isBlack();
     public abstract boolean isPawnPromotionSquare(int position);
 
-
     public abstract Player choosePlayer(WhitePlayer whitePlayer, BlackPlayer blackPlayer);
 }
 
