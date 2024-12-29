@@ -38,12 +38,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
-public class Table {
+public class Table extends Observable{
     private final JFrame gameFrame;
     private final BoardPanel boardPanel;
     private Board chessBoard;
     private BoardDirection boardDirection;
+    private final GameSetup gameSetup;
 
     private Tile sourceTile;
     private Tile destinationTile;
@@ -61,7 +64,10 @@ public class Table {
     private static String defaultPiecesImagePath = "public/";
 
 
-    public Table(){
+    private static final Table INSTANCE = new Table();
+
+
+    private Table(){
         final JMenuBar tableMenuBar=createTableMenuBar();
         this.chessBoard = Board.createStaticBoard();
         this.gameFrame = new JFrame("jChess");
@@ -72,10 +78,21 @@ public class Table {
         this.highlightLegalMoves=false;
         this.gameFrame.add(this.boardPanel,BorderLayout.CENTER);
         this.boardDirection= BoardDirection.NORMAL;
-        
+        this.gameSetup= new GameSetup(this.gameFrame, true);
         this.gameFrame.setVisible(true);
     }
         
+    public static Table get(){
+        return INSTANCE;
+    }
+
+    public GameSetup getGameSetup(){
+        return this.gameSetup;
+    }
+
+    private Board getGameBoard(){
+        return this.chessBoard;
+    }
     private JMenuBar createTableMenuBar() {
         final JMenuBar tableMenuBar = new JMenuBar();
         tableMenuBar.add(createFileMenu());
@@ -135,6 +152,47 @@ public class Table {
         
     }
 
+    private JMenu createOptionsMenu(){
+        final JMenu optionsMenu = new JMenu("Options");
+        final JMenuItem setupGameMenuItem = new JMenuItem("Setup Game");
+        setupGameMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e){
+                Table.get().getGameSetup().promptUser();
+                Table.get().setupUpdate(Table.get().getGameSetup());
+            }
+        });
+
+        optionsMenu.add(setupGameMenuItem);
+        return optionsMenu;
+    }
+
+    private void setupUpdate(final GameSetup gameSetup){
+        setChanged();
+        notifyObservers(gameSetup);
+    }
+
+    private static class TableGameAIWatcher implements Observer{
+        @Override
+
+        public void update(final Observable o,final Object arg){
+            if(Table.get().getGameSetup().isAIPlayer(Table.get().getGameBoard().currentPlayer()) &&
+            !Table.get().getGameBoard().currentPlayer().isInCheckMate() &&
+            !Table.get().getGameBoard().currentPlayer().isInStaleMate()){
+                //ai will be made here
+                final AIThinkTank thinkTank = new ThinkTank();
+                thinkTank.execute();
+            }
+            if(Table.get().getGameBoard().currentPlayer().isInCheckMate()){
+                System.out.println("Game Over "+ Table.get().getGameBoard().currentPlayer() + "checkmate");
+            }
+            if(Table.get().getGameBoard().currentPlayer().isInStaleMate()){
+                System.out.println("Game Over "+ Table.get().getGameBoard().currentPlayer() + "stalemate");
+            }
+
+        }
+    }
+
     public enum BoardDirection{
         NORMAL{
             @Override
@@ -188,6 +246,12 @@ public class Table {
             repaint();
         }
 
+
+    }
+
+    enum PlayerType {
+        HUMAN,
+        COMPUTER
     }
     private class TilePanel extends JPanel{
 
