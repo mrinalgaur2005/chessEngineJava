@@ -15,14 +15,38 @@ public class King extends Piece {
 
     private final static int[] CANDIDATE_MOVE_COORDINATES = {-9,-8,-7,-1,1,7,8,9};
 
+    private final boolean KingSideCastleCapable;
+    private final boolean QueenSideCastleCapable;
+    private final boolean isCasteled;
 
-    public King(final int piecePosition,final Alliance pieceAlliance){
+    public King(final int piecePosition,final Alliance pieceAlliance,
+                final boolean KingSideCastleCapable,final boolean QueenSideCastleCapable){
         super(PieceType.KING,piecePosition, pieceAlliance,true);
+        this.isCasteled=false;
+        this.KingSideCastleCapable=KingSideCastleCapable;
+        this.QueenSideCastleCapable=QueenSideCastleCapable;
     }
     public King(final Alliance pieceAlliance,
                 final int piecePosition,
-                final boolean isFirstMove){
+                final boolean isFirstMove,
+                final boolean isCasteled,
+                final boolean KingSideCastleCapable,
+                final boolean QueenSideCastleCapable){
                 super(PieceType.KING, piecePosition, pieceAlliance, isFirstMove);
+                this.isCasteled=isCasteled;
+                this.KingSideCastleCapable=KingSideCastleCapable;
+                this.QueenSideCastleCapable=QueenSideCastleCapable;
+    }
+
+    public boolean isKingSideCastleCapable(){
+        return this.KingSideCastleCapable;
+    }
+    public boolean isQueenSideCastleCapable(){
+        return this.QueenSideCastleCapable;
+    }
+
+    public boolean isCasteled(){
+        return this.isCasteled;
     }
 
     @Override
@@ -66,7 +90,9 @@ public class King extends Piece {
     }
     @Override
     public King movePiece(final Move move) {
-        return new King(move.getDestinationCoordinate(),move.getMovePiece().getAlliance());
+        return new King(move.getMovePiece().getAlliance(),move.getDestinationCoordinate(),
+        false,move.isCastlingMove(),
+        false,false);
     }
     public static boolean isFirstColumnExclusion(final int currentPosition,final int candidateOffset){
         return BoardUtils.FIRST_COLUMN[currentPosition] && ((candidateOffset == -9) || (candidateOffset == -1) || 

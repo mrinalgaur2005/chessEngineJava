@@ -82,6 +82,13 @@ public abstract class Player {
     public boolean isCasteled(){
         return false;
     }
+
+    public boolean isKingSideCastleCapable(){
+        return this.playerKing.isKingSideCastleCapable();
+    }
+    public boolean isQueenSideCastleCapable(){
+        return this.playerKing.isQueenSideCastleCapable();
+    }
     
     public MoveTransition makeMove(final Move move){
         if (!isMoveLegal(move)){
