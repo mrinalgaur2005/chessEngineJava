@@ -71,7 +71,7 @@ public class Bishop extends Piece {
 
     @Override
     public Bishop movePiece(final Move move) {
-        return new Bishop(move.getDestinationCoordinate(),move.getMovePiece().getAlliance());
+        return PieceUtils.INSTANCE.getMovedBishop(move.getMovePiece().getAlliance(), move.getDestinationCoordinate());
     }
 
     private static boolean isFirstColumnExclusion(final int currentPosition,final int candidateOffset){

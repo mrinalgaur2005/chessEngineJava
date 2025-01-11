@@ -5,8 +5,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.chess.engine.Alliance;
+import com.chess.engine.board.Move.MoveFactory;
 import com.chess.engine.pieces.Bishop;
 import com.chess.engine.pieces.King;
 import com.chess.engine.pieces.Knight;
@@ -34,6 +37,8 @@ public class Board {
 
     public final Pawn enPassantPawn;
 
+    private final Move transitionMove;
+
     private Board(final Builder builder){
         this.gameBoard=createGameBoard(builder);
         this.whitePieces=calculateActivePieces(this.gameBoard,Alliance.WHITE);
@@ -47,7 +52,7 @@ public class Board {
         this.blackPlayer= new BlackPlayer(this,whiteStandardLegalMoves,blackStandardLegalMoves);
         this.currentPlayer= builder.nextMoveMaker.choosePlayer(this.whitePlayer,this.blackPlayer);
 
-
+        this.transitionMove = builder.transitionMove != null ? builder.transitionMove : MoveFactory.getNullMove();
     }
 
     @Override
@@ -83,8 +88,17 @@ public class Board {
         return this.whitePieces;
     }
 
+    public Collection<Piece> getAllPieces() {
+        return Stream.concat(this.whitePieces.stream(),
+                             this.blackPieces.stream()).collect(Collectors.toList());
+    }
+
     public Pawn getEnPassentPawn(){
         return this.enPassantPawn;
+    }
+
+    public Move getTransitionMove(){
+        return this.transitionMove;
     }
 
 
@@ -125,7 +139,8 @@ public class Board {
     }
 
     public static Board createStaticBoard() {
-        Board board =FenUtilities.createGameFromFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        Board board =FenUtilities.createGameFromFEN("8/8/8/K2nk3/8/4b3/1q6/2q2q2 w - - 0 76");
+        //rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
         return board;
     }
     
@@ -134,6 +149,7 @@ public class Board {
         Map<Integer,Piece>boardConfig;
         Alliance nextMoveMaker;
         Pawn enPassantPawn;
+        Move transitionMove;
 
         public Builder(){
             this.boardConfig=new HashMap<>();
@@ -149,6 +165,10 @@ public class Board {
             return this;
         } 
 
+        public Builder setMoveTransition(final Move transitionMove) {
+            this.transitionMove = transitionMove;
+            return this;
+        }
 
         public Board build(){
             return new Board(this);
