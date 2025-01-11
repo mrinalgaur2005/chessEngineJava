@@ -1,19 +1,26 @@
 package com.chess.pgn;
 
+import com.chess.engine.Alliance;
 import com.chess.engine.board.Board;
 import com.chess.engine.board.BoardUtils;
+import com.chess.engine.board.Board.Builder;
+import com.chess.engine.pieces.Bishop;
+import com.chess.engine.pieces.King;
+import com.chess.engine.pieces.Knight;
 import com.chess.engine.pieces.Pawn;
+import com.chess.engine.pieces.Queen;
+import com.chess.engine.pieces.Rook;
 
 public class FenUtilities {
     private FenUtilities(){
         throw new RuntimeException("Cant be done sorri");
     }
 
-    private static Board createGameFromFEN(final String fenString){
-        return null;
+    public static Board createGameFromFEN(final String fenString){
+        return ParseFEN(fenString);
     }
 
-    private static String createFENFromGame(final Board board){
+    public static String createFENFromGame(final Board board){
         return calculateBoardText(board) + " " +
                 calculateCurrentPlayerText(board) + " " +
                 calculateCastleText(board) + " "+
@@ -23,6 +30,114 @@ public class FenUtilities {
 
     private static String calculateCurrentPlayerText(final Board board){
         return board.currentPlayer().toString().substring(0,1).toLowerCase();
+    }
+
+
+    private static Board ParseFEN(final String fenString){
+        final String[] fenPartitions = fenString.trim().split(" ");
+        final Builder builder = new Builder();
+        final boolean whiteKingSideCastle = whiteKingSideCastle(fenPartitions[2]);
+        final boolean whiteQueenSideCastle = whiteQueenSideCastle(fenPartitions[2]);
+        final boolean blackKingSideCastle = blackKingSideCastle(fenPartitions[2]);
+        final boolean blackQueenSideCastle = blackQueenSideCastle(fenPartitions[2]);
+        final String gameConfiguration = fenPartitions[0];
+        final char[] boardTiles = gameConfiguration.replaceAll("/", "")
+                .replaceAll("8", "--------")
+                .replaceAll("7", "-------")
+                .replaceAll("6", "------")
+                .replaceAll("5", "-----")
+                .replaceAll("4", "----")
+                .replaceAll("3", "---")
+                .replaceAll("2", "--")
+                .replaceAll("1", "-")
+                .toCharArray();
+
+
+        int i=0;
+        while(i<boardTiles.length){
+            switch (boardTiles[i]) {
+                case 'r':
+                    builder.setPiece(new Rook(i,Alliance.BLACK));
+                    i++;
+                    break;
+                case 'n':
+                    builder.setPiece(new Knight(i,Alliance.BLACK));
+                    i++;
+                    break;
+                case 'b':
+                    builder.setPiece(new Bishop(i,Alliance.BLACK));
+                    i++;
+                    break;
+                case 'q':
+                    builder.setPiece(new Queen(i,Alliance.BLACK));
+                    i++;
+                    break;
+                case 'k':
+                    final boolean isCastled = !blackKingSideCastle && !blackQueenSideCastle;
+                    builder.setPiece(new King(i,Alliance.BLACK, blackKingSideCastle, blackQueenSideCastle));
+                    i++;
+                    break;
+                case 'p':
+                    builder.setPiece(new Pawn(i,Alliance.BLACK));
+                    i++;
+                    break;
+                case 'R':
+                    builder.setPiece(new Rook(i,Alliance.WHITE));
+                    i++;
+                    break;
+                case 'N':
+                    builder.setPiece(new Knight(i,Alliance.WHITE));
+                    i++;
+                    break;
+                case 'B':
+                    builder.setPiece(new Bishop(i,Alliance.WHITE));
+                    i++;
+                    break;
+                case 'Q':
+                    builder.setPiece(new Queen(i,Alliance.WHITE));
+                    i++;
+                    break;
+                case 'K':
+                    builder.setPiece(new King(i,Alliance.WHITE, whiteKingSideCastle, whiteQueenSideCastle));
+                    i++;
+                    break;
+                case 'P':
+                    builder.setPiece(new Pawn( i,Alliance.WHITE));
+                    i++;
+                    break;
+                case '-':
+                    i++;
+                    break;
+                default:
+                    throw new RuntimeException("Invalid FEN String " +gameConfiguration);
+            }
+        }
+        builder.setMoveMaker(moveMaker(fenPartitions[1]));
+        return builder.build();
+    }
+
+    private static Alliance moveMaker(final String moveMakerString) {
+        if(moveMakerString.equals("w")) {
+            return Alliance.WHITE;
+        } else if(moveMakerString.equals("b")) {
+            return Alliance.BLACK;
+        }
+        throw new RuntimeException("Invalid FEN String " +moveMakerString);
+    }
+    private static boolean whiteKingSideCastle(final String fenCastleString) {
+        return fenCastleString.contains("K");
+    }
+
+    private static boolean whiteQueenSideCastle(final String fenCastleString) {
+        return fenCastleString.contains("Q");
+    }
+
+    private static boolean blackKingSideCastle(final String fenCastleString) {
+        return fenCastleString.contains("k");
+    }
+
+    private static boolean blackQueenSideCastle(final String fenCastleString) {
+        return fenCastleString.contains("q");
     }
 
     private static String calculateBoardText(final Board board){

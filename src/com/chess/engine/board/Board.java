@@ -1,4 +1,5 @@
 package com.chess.engine.board;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,6 +19,7 @@ import com.chess.engine.player.Player;
 import com.chess.engine.player.WhitePlayer;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.chess.pgn.FenUtilities;
 
 public class Board {
 
@@ -123,33 +125,8 @@ public class Board {
     }
 
     public static Board createStaticBoard() {
-        final Builder builder = new Builder();
-        builder.setPiece(new Rook(0, Alliance.BLACK));
-        builder.setPiece(new Knight(1, Alliance.BLACK));
-        builder.setPiece(new Bishop(2, Alliance.BLACK));
-        builder.setPiece(new Queen(3, Alliance.BLACK));
-        builder.setPiece(new King(4, Alliance.BLACK,true,true));
-        builder.setPiece(new Bishop(5, Alliance.BLACK));
-        builder.setPiece(new Knight(6, Alliance.BLACK));
-        builder.setPiece(new Rook(7, Alliance.BLACK));
-        for (int i = 8; i < 16; i++) {
-            builder.setPiece(new Pawn(i, Alliance.BLACK));
-        }
-        for (int i = 48; i < 56; i++) {
-            builder.setPiece(new Pawn(i, Alliance.WHITE));
-        }
-        builder.setPiece(new Rook(56, Alliance.WHITE));
-        builder.setPiece(new Knight(57, Alliance.WHITE));
-        builder.setPiece(new Bishop(58, Alliance.WHITE));
-        builder.setPiece(new Queen(59, Alliance.WHITE));
-        builder.setPiece(new King(60, Alliance.WHITE,true,true));
-        builder.setPiece(new Bishop(61, Alliance.WHITE));
-        builder.setPiece(new Knight(62, Alliance.WHITE));
-        builder.setPiece(new Rook(63, Alliance.WHITE));
-
-        //WHITE TO MOVE
-        builder.setMoveMaker(Alliance.WHITE);
-        return builder.build();
+        Board board =FenUtilities.createGameFromFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        return board;
     }
     
     public static class Builder{

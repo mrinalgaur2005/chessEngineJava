@@ -20,40 +20,43 @@ public class MiniMax implements MoveStrategy{
     }
     
     @Override
-    public Move execute(Board board){
+public Move execute(Board board) {
 
-        final long startTime = System.currentTimeMillis();
-        
-        Move bestMove = null;
-        int highestSeenVal=Integer.MIN_VALUE;
-        int lowerSeenVal =Integer.MAX_VALUE;
-        int currValue;
+    final long startTime = System.currentTimeMillis();
 
-        int depth = this.searchDepth;
+    Move bestMove = null;
+    int highestSeenVal = Integer.MIN_VALUE;
+    int lowerSeenVal = Integer.MAX_VALUE;
 
-        System.out.println(board.currentPlayer()+"Thinking with depth" +depth);
+    final int depth = this.searchDepth;
 
-        int numMoves = board.currentPlayer().getLegalMoves().size();
-        for(final Move move:board.currentPlayer().getLegalMoves()){
-            final MoveTransition moveTransition = board.currentPlayer().makeMove(move);
-            if(moveTransition.getMoveStatus().isDone()){
-                currValue = board.currentPlayer().getAlliance().isWhite() ?
-                            min(moveTransition.getTransitionBoard(), depth-1) :
-                            max(moveTransition.getTransitionBoard(),depth-1);
+    System.out.println(board.currentPlayer() + " Thinking with depth " + depth);
 
-                if(board.currentPlayer().getAlliance().isWhite() && currValue >= highestSeenVal){
-                    highestSeenVal=currValue;
-                    bestMove=move;
-                }else if(board.currentPlayer().getAlliance().isBlack() && currValue <= lowerSeenVal){
-                    lowerSeenVal=currValue;
-                    bestMove=move;
-                }
+    for (final Move move : board.currentPlayer().getLegalMoves()) {
+        final MoveTransition moveTransition = board.currentPlayer().makeMove(move);
+        if (moveTransition.getMoveStatus().isDone()) {
+            final int currValue = board.currentPlayer().getAlliance().isWhite()
+                ? min(moveTransition.getTransitionBoard(), depth - 1)
+                : max(moveTransition.getTransitionBoard(), depth - 1);
+
+            if (board.currentPlayer().getAlliance().isWhite() && currValue > highestSeenVal) {
+                highestSeenVal = currValue;
+                bestMove = move;
+            } else if (board.currentPlayer().getAlliance().isBlack() && currValue < lowerSeenVal) {
+                lowerSeenVal = currValue;
+                bestMove = move;
             }
-
         }
-        final long exectionTime = System.currentTimeMillis()-startTime;
-        return null;
     }
+
+    final long executionTime = System.currentTimeMillis() - startTime;
+
+    System.out.println("Execution Time: " + executionTime + "ms");
+    System.out.println("Best Move: " + bestMove);
+
+    return bestMove;
+}
+
 
     private static boolean isGameEndScenario(final Board board){
         return board.currentPlayer().isInCheckMate() || 
