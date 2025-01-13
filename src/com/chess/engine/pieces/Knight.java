@@ -64,6 +64,11 @@ public class Knight extends Piece{
     public String toString(){
         return PieceType.KNIGHT.toString();
     }
+
+    @Override
+    public int locationBonus(){
+        return this.pieceAlliance.knightBonus(this.piecePosition);
+    }
     @Override
     public Knight movePiece(final Move move) {
         return PieceUtils.INSTANCE.getMovedKnight(move.getMovePiece().getAlliance(), move.getDestinationCoordinate());

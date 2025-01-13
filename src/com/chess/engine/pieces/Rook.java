@@ -67,6 +67,10 @@ public class Rook extends Piece {
         return PieceType.ROOK.toString();
     }
     @Override
+    public int locationBonus(){
+        return this.pieceAlliance.rookBonus(this.piecePosition);
+    }
+    @Override
     public Rook movePiece(final Move move) {
         return PieceUtils.INSTANCE.getMovedRook(move.getMovePiece().getAlliance(), move.getDestinationCoordinate());
     }

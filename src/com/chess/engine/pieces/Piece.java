@@ -71,6 +71,8 @@ public abstract class Piece {
         return this.pieceType.getPieceValue();
     }
 
+    public abstract int locationBonus();
+
     public enum PieceType {
 
         PAWN(100,"p") {
@@ -83,8 +85,12 @@ public abstract class Piece {
             public boolean isRook(){
                 return false;
             }
+            @Override
+            public void adjustValueBasedOnPosition(int positionVal){
+                this.pieceValue+=positionVal;
+            }
         },
-        KNIGHT(300,"n") {
+        KNIGHT(320,"n") {
             @Override
             public boolean isKing() {
                return false;
@@ -93,8 +99,12 @@ public abstract class Piece {
             public boolean isRook(){
                 return false;
             }
+            @Override
+            public void adjustValueBasedOnPosition(int positionVal){
+                this.pieceValue+=positionVal;
+            }
         },
-        BISHOP(350,"b") {
+        BISHOP(330,"b") {
             @Override
             public boolean isKing() {
                 return false;
@@ -102,6 +112,10 @@ public abstract class Piece {
             @Override
             public boolean isRook(){
                 return false;
+            }
+            @Override
+            public void adjustValueBasedOnPosition(int positionVal){
+                this.pieceValue+=positionVal;
             }
         },
         ROOK(500,"r") {
@@ -113,6 +127,10 @@ public abstract class Piece {
             public boolean isRook(){
                 return true;
             }
+            @Override
+            public void adjustValueBasedOnPosition(int positionVal){
+                this.pieceValue+=positionVal;
+            }
         },
         QUEEN(900,"q") {
             @Override
@@ -123,8 +141,12 @@ public abstract class Piece {
             public boolean isRook(){
                 return false;
             }
+            @Override
+            public void adjustValueBasedOnPosition(int positionVal){
+                this.pieceValue+=positionVal;
+            }
         },
-        KING(100000,"k") {
+        KING(20000,"k") {
             @Override
             public boolean isKing() {
                 return true;
@@ -136,7 +158,7 @@ public abstract class Piece {
         };
     
         private final String pieceName;
-        private int pieceValue;
+        protected int pieceValue;
     
         PieceType(final int pieceValue,final String pieceName) {
             this.pieceName = pieceName;
@@ -155,6 +177,8 @@ public abstract class Piece {
         public int getPieceValue(){
             return this.pieceValue;
         }
+
+        public void adjustValueBasedOnPosition(int positionVal){}
         
     }
 

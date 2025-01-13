@@ -10,13 +10,8 @@ import java.util.stream.Stream;
 
 import com.chess.engine.Alliance;
 import com.chess.engine.board.Move.MoveFactory;
-import com.chess.engine.pieces.Bishop;
-import com.chess.engine.pieces.King;
-import com.chess.engine.pieces.Knight;
 import com.chess.engine.pieces.Pawn;
 import com.chess.engine.pieces.Piece;
-import com.chess.engine.pieces.Queen;
-import com.chess.engine.pieces.Rook;
 import com.chess.engine.player.BlackPlayer;
 import com.chess.engine.player.Player;
 import com.chess.engine.player.WhitePlayer;
@@ -139,7 +134,7 @@ public class Board {
     }
 
     public static Board createStaticBoard() {
-        Board board =FenUtilities.createGameFromFEN("8/8/8/K2nk3/8/4b3/1q6/2q2q2 w - - 0 76");
+        Board board =FenUtilities.createGameFromFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
         //rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
         return board;
     }

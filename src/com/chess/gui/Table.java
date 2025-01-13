@@ -227,7 +227,7 @@ public class Table extends Observable{
         @Override
         protected Move doInBackground() throws Exception{
 
-            final MoveStrategy miniMax = new MiniMax(4);
+            final MoveStrategy miniMax = new MiniMax(4 );
 
             final Move bestMove = miniMax.execute(Table.get().getGameBoard());
             return bestMove;

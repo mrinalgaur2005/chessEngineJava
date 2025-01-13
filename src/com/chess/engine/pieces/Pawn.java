@@ -128,6 +128,7 @@ public class Pawn extends Piece {
                             legalMoves.add(new Move.PawnPromotion
                             (new Move.PawnMove(board, this, candidateDestinationCoordinate),
                             PieceUtils.INSTANCE.getMovedKnight(this.pieceAlliance, candidateDestinationCoordinate)));
+                            // System.out.println(legalMoves);
                         } else {
                             legalMoves.add(new Move.PawnAttackMove(board, this, candidateDestinationCoordinate,pieceOnCandidate));
                         }
@@ -145,6 +146,10 @@ public class Pawn extends Piece {
         
         }
     return ImmutableList.copyOf(legalMoves);
+    }
+    @Override
+    public int locationBonus(){
+        return this.pieceAlliance.pawnBonus(this.piecePosition);
     }
     @Override
     public String toString(){

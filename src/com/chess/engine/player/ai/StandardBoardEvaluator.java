@@ -23,13 +23,14 @@ public final class StandardBoardEvaluator implements BoardEvaluator {
     }
 
     private int scorePlayer(final Board board, final Player player, final int depth) {
-        return pieceValue(player) +
+        return pieceValue(player)+
                 attacks(player) +
                 kingThreats(player, depth) +
                 mobility(player) +
                 check(player) +
                 checkMate(player, depth) +
-                castled(player) -
+                pawnAnalyzer(player) +
+                castled(player) +
                 stalemateRisk(player) -
                 checkmateRisk(player);
     }
@@ -38,7 +39,7 @@ public final class StandardBoardEvaluator implements BoardEvaluator {
         int pieceValuationScore = 0;
         int numBishops = 0;
         for (final Piece piece : player.getActivePieces()) {
-            pieceValuationScore += piece.getPieceValue();
+            pieceValuationScore += piece.getPieceValue() + piece.locationBonus();
             if (piece.getPieceType() == PieceType.BISHOP) {
                 numBishops++;
             }
@@ -95,5 +96,9 @@ public final class StandardBoardEvaluator implements BoardEvaluator {
 
     private static int checkmateRisk(final Player player) {
         return player.isInCheck() && player.getLegalMoves().isEmpty() ? CHECKMATE_BONUS : 0;
+    }
+
+    private static int pawnAnalyzer(final Player player) {
+        return PawnStructureEvaluator.get().pawnStructureScore(player);
     }
 }
