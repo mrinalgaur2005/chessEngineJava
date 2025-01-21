@@ -1,82 +1,54 @@
 package com.chess.engine.player.ai.OpeningBook;
 import java.util.*;
-import java.util.stream.Collectors;
-
 public class OpeningBook {
 
-    private final Map<String, List<BookMove>> movesByPosition;
-    private final Random rng;
+    private final Map<String, List<WeightedMove>> book;
 
-    public OpeningBook(String fileContent) {
-        this.rng = new Random();
-        this.movesByPosition = new HashMap<>();
-        loadBook(fileContent);
+    public OpeningBook(String openingBookContent) {
+        this.book = parseOpeningBook(openingBookContent);
     }
 
-    // Load the opening book from a string
-    private void loadBook(String fileContent) {
-        String[] entries = fileContent.trim().split("pos");
-        for (String entry : entries) {
-            String[] lines = entry.trim().split("\n");
-            if (lines.length > 0) {
-                String fen = lines[0].trim();
-                List<BookMove> bookMoves = Arrays.stream(lines, 1, lines.length)
-                        .map(line -> {
-                            String[] parts = line.split(" ");
-                            return new BookMove(parts[0], Integer.parseInt(parts[1]));
-                        })
-                        .collect(Collectors.toList());
-                movesByPosition.put(removeMoveCountersFromFEN(fen), bookMoves);
-            }
-        }
-    }
+    private Map<String, List<WeightedMove>> parseOpeningBook(String content) {
+        Map<String, List<WeightedMove>> bookMap = new HashMap<>();
+        String[] lines = content.split("\n");
 
-    public boolean hasBookMove(String positionFen) {
-        return movesByPosition.containsKey(removeMoveCountersFromFEN(positionFen));
-    }
-
-    public Optional<String> getBookMove(String positionFen, double weightPow) {
-        final double clamlpedWeightPow = Math.max(0, Math.min(1, weightPow)); // Clamp weightPow between 0 and 1
-        List<BookMove> moves = movesByPosition.get(removeMoveCountersFromFEN(positionFen));
-
-        if (moves != null && !moves.isEmpty()) {
-            int totalWeight = moves.stream().mapToInt(move -> weightedPlayCount(move.numTimesPlayed, clamlpedWeightPow)).sum();
-
-            List<Double> cumulativeProbabilities = new ArrayList<>();
-            double cumulative = 0.0;
-            for (BookMove move : moves) {
-                double probability = (double) weightedPlayCount(move.numTimesPlayed, weightPow) / totalWeight;
-                cumulative += probability;
-                cumulativeProbabilities.add(cumulative);
-            }
-
-            double randomValue = rng.nextDouble();
-            for (int i = 0; i < moves.size(); i++) {
-                if (randomValue <= cumulativeProbabilities.get(i)) {
-                    return Optional.of(moves.get(i).moveString);
+        String currentFen = null;
+        for (String line : lines) {
+            if (line.startsWith("pos")) {
+                // Extract FEN from "pos ..."
+                currentFen = line.substring(4).trim();
+                bookMap.put(currentFen, new ArrayList<>());
+            } else if (currentFen != null) {
+                // Parse UCI moves and weights
+                String[] parts = line.trim().split(" ");
+                if (parts.length >= 2) {
+                    String uciMove = parts[0];
+                    int weight = Integer.parseInt(parts[1]);
+                    bookMap.get(currentFen).add(new WeightedMove(uciMove, weight));
                 }
             }
         }
-
-        return Optional.empty();
+        return bookMap;
     }
 
-    private int weightedPlayCount(int playCount, double weightPow) {
-        return (int) Math.ceil(Math.pow(playCount, weightPow));
-    }
-
-    private String removeMoveCountersFromFEN(String fen) {
-        String[] fenParts = fen.split(" ");
-        return String.join(" ", Arrays.copyOf(fenParts, 4));
-    }
-
-    public static class BookMove {
-        public final String moveString;
-        public final int numTimesPlayed;
-
-        public BookMove(String moveString, int numTimesPlayed) {
-            this.moveString = moveString;
-            this.numTimesPlayed = numTimesPlayed;
+    public Optional<String> getBookMove(String fen, double randomnessFactor) {
+        if (!book.containsKey(fen)) {
+            return Optional.empty();
         }
+        List<WeightedMove> moves = book.get(fen);
+
+        // Weighted random selection
+        int totalWeight = moves.stream().mapToInt(WeightedMove::weight).sum();
+        double randomValue = Math.random() * totalWeight * randomnessFactor;
+
+        for (WeightedMove move : moves) {
+            randomValue -= move.weight();
+            if (randomValue <= 0) {
+                return Optional.of(move.uciMove());
+            }
+        }
+        return Optional.of(moves.get(moves.size() - 1).uciMove()); // Fallback
     }
+
+    private record WeightedMove(String uciMove, int weight) {}
 }

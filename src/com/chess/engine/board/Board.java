@@ -96,6 +96,11 @@ public class Board {
         return this.transitionMove;
     }
 
+    public Piece getPieceAt(final int tileCoordinate) {
+        final Tile tile = getTile(tileCoordinate);
+        return tile.isTileOccupied() ? tile.getPiece() : null;
+    }
+
 
     private Collection<Move> calculateLegalMoves(Collection<Piece> pieces){
         final List<Move> legalMoves =new ArrayList<>();

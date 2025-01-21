@@ -218,34 +218,53 @@ public class Table extends Observable{
         notifyObservers(playerType);
     }
 
-    private static class AIThinkTank extends SwingWorker<Move,String>{
+    private static class AIThinkTank extends SwingWorker<Move, String> {
 
-        private AIThinkTank(){
-
+        private final String openingBookContent;
+    
+        private AIThinkTank() {
+            this.openingBookContent = loadOpeningBook("book/Book.txt");
+            System.out.println("eh"+openingBookContent);
         }
-
+    
         @Override
-        protected Move doInBackground() throws Exception{
-
-            final MoveStrategy miniMax = new MiniMax(4 );
-
-            final Move bestMove = miniMax.execute(Table.get().getGameBoard());
-            return bestMove;
+        protected Move doInBackground() throws Exception {
+            // Pass the opening book content to the MiniMax constructor
+            final MoveStrategy miniMax = new MiniMax(4, openingBookContent);
+            return miniMax.execute(Table.get().getGameBoard());
         }
-
+    
         @Override
-        public void done(){
+        public void done() {
             try {
-                final Move bestMove=get();
+                final Move bestMove = get();
                 Table.get().updateComputerMove(bestMove);
-                Table.get().updateGameboard(Table.get().getGameBoard().currentPlayer().makeMove(bestMove).getTransitionBoard());
-                Table.get().getBoardPannel().drawBoard(Table.get().getGameBoard());;
+                Table.get().updateGameboard(
+                    Table.get().getGameBoard().currentPlayer().makeMove(bestMove).getTransitionBoard());
+                Table.get().getBoardPannel().drawBoard(Table.get().getGameBoard());
                 Table.get().moveMadeUpdate(PlayerType.COMPUTER);
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
         }
+    
+        private String loadOpeningBook(String filePath) {
+            try {
+                File file = new File(filePath);
+                if (file.exists()) {
+                    String string = new String(java.nio.file.Files.readAllBytes(file.toPath()));
+                    System.out.println(string);
+                    return new String(java.nio.file.Files.readAllBytes(file.toPath()));
+                } else {
+                    System.err.println("Opening book file not found: " + filePath);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return "";
+        }
     }
+    
 
     public enum BoardDirection{
         NORMAL{

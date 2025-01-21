@@ -5,6 +5,7 @@ import com.chess.engine.board.Move;
 import com.chess.engine.player.MoveTransition;
 import com.chess.engine.player.ai.OpeningBook.OpeningBook;
 import com.chess.pgn.FenUtilities;
+import com.chess.pgn.UciParser;
 
 import java.util.Optional;
 
@@ -13,9 +14,11 @@ public class MiniMax implements MoveStrategy {
     public final BoardEvaluator boardEvaluator;
     public final int searchDepth;
     private final OpeningBook openingBook;
+    public final UciParser uciParser;
 
     public MiniMax(final int searchDepth, String openingBookContent) {
         this.boardEvaluator = new StandardBoardEvaluator();
+        this.uciParser=new UciParser();
         this.searchDepth = searchDepth;
         this.openingBook = new OpeningBook(openingBookContent);
     }
@@ -27,34 +30,32 @@ public class MiniMax implements MoveStrategy {
 
     @Override
     public Move execute(Board board) {
-
         final long startTime = System.currentTimeMillis();
-
         Move bestMove = null;
-        int highestSeenVal = Integer.MIN_VALUE;
-        int lowerSeenVal = Integer.MAX_VALUE;
 
         System.out.println(board.currentPlayer() + " Thinking with depth " + searchDepth);
 
         String positionFen = FenUtilities.createFENFromGame(board);
-        
-        // First check if there's a move in the opening book
-        Optional<String> bookMove = openingBook.getBookMove(positionFen, 0.5); // Use a default weight
+
+        // Check for opening book moves
+        Optional<String> bookMove = openingBook.getBookMove(positionFen, 0.5);
         if (bookMove.isPresent()) {
-            bestMove = Move.fromString(bookMove.get()); // Convert the book move to a Move object
+            System.out.println("hello");
+            bestMove = uciParser.parseMove(board, bookMove.get());
             System.out.println("Opening book move found: " + bestMove);
-            return bestMove; // Early exit if we found a book move
+            return bestMove;
         }
 
-        // If no book move found, fall back to Minimax
+        // Fallback to Minimax
+        int highestSeenVal = Integer.MIN_VALUE;
+        int lowerSeenVal = Integer.MAX_VALUE;
+
         for (final Move move : board.currentPlayer().getLegalMoves()) {
             final MoveTransition moveTransition = board.currentPlayer().makeMove(move);
             if (moveTransition.getMoveStatus().isDone()) {
                 final int currValue = board.currentPlayer().getAlliance().isWhite()
                         ? min(moveTransition.getTransitionBoard(), searchDepth - 1)
                         : max(moveTransition.getTransitionBoard(), searchDepth - 1);
-
-                System.out.println("Evaluating Move: " + move + " Score: " + currValue);
 
                 if (board.currentPlayer().getAlliance().isWhite() && currValue > highestSeenVal) {
                     highestSeenVal = currValue;
@@ -67,10 +68,8 @@ public class MiniMax implements MoveStrategy {
         }
 
         final long executionTime = System.currentTimeMillis() - startTime;
-
         System.out.println("Execution Time: " + executionTime + "ms");
         System.out.println("Best Move: " + bestMove);
-
         return bestMove;
     }
 
